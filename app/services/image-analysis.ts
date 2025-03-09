@@ -8,14 +8,14 @@ export async function analyzeWithGroq(imageBase64: string) {
   try {
     console.log("🔍 Analyzing image with GROQ...");
 
-    const chatCompletion = await groq.chat.completions.create({
+    const prompt = {
       messages: [
         {
           role: "user",
           content: [
             {
               type: "text",
-              text: "Analyze this produce image. Provide a JSON response with these fields: item (the produce name), quality (good/fair/poor), and price (if visible, otherwise null). Example: {\"item\": \"Red Apples\", \"quality\": \"good\", \"price\": \"$2.99/lb\"}"
+              text: "Analyze this image with produce and food items from the farmers market. Provide a JSON response with these fields: item (the produce name), quality (excellent/good/fair/poor), and price (if visible, otherwise null). Example: {\"item\": \"Red Apples\", \"quality\": \"good\", \"price\": \"$2.99/lb\"}"
             },
             {
               type: "image_url",
@@ -31,9 +31,22 @@ export async function analyzeWithGroq(imageBase64: string) {
       max_tokens: 150,
       top_p: 1,
       stream: false
+    };
+
+    console.log("📤 Sending prompt to GROQ:", {
+      ...prompt,
+      messages: prompt.messages.map(msg => ({
+        ...msg,
+        content: msg.content.map(c => 
+          c.type === 'image_url' ? { ...c, image_url: { url: 'BASE64_IMAGE_DATA' }} : c
+        )
+      }))
     });
 
+    const chatCompletion = await groq.chat.completions.create(prompt);
+
     const analysis = chatCompletion.choices[0].message.content;
+    console.log("📥 Received response from GROQ:", analysis);
     
     try {
       // Try to parse as JSON

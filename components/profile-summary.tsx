@@ -43,8 +43,10 @@ export function ProfileSummary({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="keto">keto</SelectItem>
-              <SelectItem value="vegan">vegan</SelectItem>
+            <SelectItem value="keto">keto</SelectItem>
+            <SelectItem value="pescatarian">pescatarian</SelectItem>
+            <SelectItem value="omnivore">omnivore</SelectItem>
+            <SelectItem value="vegan">vegan</SelectItem>
               <SelectItem value="paleo">paleo</SelectItem>
               <SelectItem value="vegetarian">vegetarian</SelectItem>
               <SelectItem value="gluten-free">gluten-free</SelectItem>

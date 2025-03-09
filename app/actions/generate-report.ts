@@ -22,7 +22,7 @@ export async function generateShoppingReport(
 
     // Create a prompt that includes the profile data and item labels
     const prompt = `
-      Generate a detailed sustainable shopping report based on the following information:
+      Generate a detailed sustainable shopping list based on the following information:
       
       Shopping Profile:
       - Shopping for ${profileData.people} people
@@ -40,7 +40,7 @@ export async function generateShoppingReport(
       1. A brief summary of the shopping choices based on the ACTUAL items listed above
       2. A sustainability score (0-100)
       3. Analysis of each specific item listed above (not generic items)
-      4. Recommendations for more sustainable shopping in the future
+      4. Recommendation with a selection of items, quantities, and total estimated cost the user should buy to cook for the configure numberd of people and preferences. Include a recipe idea, and highlight the nutritional values. For example 'Great day at the farmer market. Buy 2 lettuce heads and cilantro and one baguette. This will feed 2 people with protein and fiber.'
       
       IMPORTANT: Return ONLY a JSON object with no markdown formatting, code blocks, or backticks. The response should be a valid JSON object with the following structure:
       {
@@ -56,6 +56,7 @@ export async function generateShoppingReport(
       }
     `
 
+    console.log(prompt);
     // Call Groq API using the AI SDK
     const { text } = await generateText({
       model: groq("llama-3.1-8b-instant"), // Using Llama 3.1 8B model for fast responses
