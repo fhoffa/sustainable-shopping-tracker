@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
+import { VisualizeButton } from "@/components/visualize-button"
 
 interface ReportData {
   summary: string
@@ -77,10 +78,13 @@ export function GeneratedReport({ people, diet, budget, reportData, items }: Gen
 
         <div>
           <h3 className="font-medium mb-2">Recommendations</h3>
-          <ul className="space-y-2">
+          <ul className="space-y-4">
             {reportData.recommendations.map((recommendation, index) => (
               <li key={index} className="text-sm">
-                {recommendation}
+                <div className="space-y-2">
+                  <p>{recommendation}</p>
+                  <VisualizeButton prompt={recommendation} />
+                </div>
               </li>
             ))}
           </ul>
