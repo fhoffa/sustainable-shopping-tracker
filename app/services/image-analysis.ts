@@ -14,7 +14,7 @@ export async function analyzeWithGroq(imageBase64: string) {
         content: [
           {
             type: "text" as const,
-            text: "Analyze this image with produce and food items from the farmers market. Provide a JSON response with these fields: item (the produce name), quality (excellent/good/fair/poor), and price (if visible, otherwise null). Example: {\"item\": \"Red Apples\", \"quality\": \"good\", \"price\": \"$2.99/lb\"}"
+            text: "Analyze this image with produce and food items from the farmers market. Provide a JSON response with these fields: item (the produce name), quality (excellent/good/fair/poor), price (if visible, otherwise null), and dish_description (a simple description of the dish without quantities, nutritional info, or prices). Example: {\"item\": \"Red Apples\", \"quality\": \"good\", \"price\": \"$2.99/lb\", \"dish_description\": \"apple pie with cinnamon and vanilla\"}"
           },
           {
             type: "image_url" as const,
@@ -58,13 +58,15 @@ export async function analyzeWithGroq(imageBase64: string) {
       return {
         item: parsed.item || "Unknown item",
         quality: parsed.quality || null,
-        price: parsed.price || null
+        price: parsed.price || null,
+        dish_description: parsed.dish_description || null
       };
     } catch {
       return {
         item: analysis,
         quality: null,
-        price: null
+        price: null,
+        dish_description: null
       };
     }
   } catch (error) {

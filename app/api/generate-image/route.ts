@@ -28,10 +28,38 @@ async function waitForImage(taskId: string, apiKey: string): Promise<string> {
   throw new Error('Timeout waiting for image generation');
 }
 
+function extractRecipeFromPrompt(prompt: string): string {
+  // Remove price information
+  prompt = prompt.replace(/\$\d+(?:\.\d{2})?(?:-\d+(?:\.\d{2})?)?/g, '');
+  
+  // Remove quantity information
+  prompt = prompt.replace(/\d+-\d+|\d+(?:\.\d+)?\s*(?:pounds?|lbs?|oz|ounces?|kg|kilograms?)/gi, '');
+  
+  // Remove serving information
+  prompt = prompt.replace(/(?:serves?|serving)\s+\d+/gi, '');
+  
+  // Remove nutritional and health information
+  prompt = prompt.replace(/(?:contains|provides|healthy|nutritious|keto-friendly|low-carb|high-protein).*?(?:vitamin|protein|nutrients?|lycopene|antioxidants?|minerals?|healthy|nutritious)/gi, '');
+  
+  // Remove cost estimates
+  prompt = prompt.replace(/estimated cost:.*$/i, '');
+  
+  // Remove diet-related prefixes
+  prompt = prompt.replace(/(?:keto|paleo|vegan|vegetarian|gluten-free|dairy-free|low-carb|healthy)-(?:friendly|style|based)?\s*/gi, '');
+  
+  // Clean up any double spaces and trim
+  prompt = prompt.replace(/\s+/g, ' ').trim();
+  
+  // Add "food photography of" to the beginning for better image generation
+  return `food photography of ${prompt}`;
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const { prompt } = await req.json();
-    console.log("🎨 Generating image for prompt:", prompt);
+    const { prompt: originalPrompt } = await req.json();
+    const prompt = `food photography of ${originalPrompt.dish_description || originalPrompt}`;
+    console.log("🎨 Original prompt:", originalPrompt);
+    console.log("🎨 Simplified prompt for image:", prompt);
 
     const apiKey = process.env.NEXT_PUBLIC_FREEPIK_API_KEY!;
     
@@ -43,7 +71,7 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify({
         prompt,
-        negative_prompt: "b&w, earth, cartoon, ugly",
+        negative_prompt: "b&w, earth, cartoon, ugly, text, watermark",
         guidance_scale: 2,
         seed: Math.floor(Math.random() * 1000),
         num_images: 1,
@@ -51,10 +79,10 @@ export async function POST(req: NextRequest) {
           size: "square_1_1"
         },
         styling: {
-          style: "anime",
-          color: "pastel",
-          lightning: "warm",
-          framing: "portrait"
+          style: "photo",
+          color: "vibrant",
+          lightning: "studio",
+          framing: "close-up"
         }
       })
     });
@@ -67,7 +95,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Failed to generate image' }, { status: 500 });
     }
     
-    // Convert the base64 data to a data URL
     const image_url = `data:image/jpeg;base64,${taskData.data[0].base64}`;
     return NextResponse.json({ image_url });
   } catch (error) {
