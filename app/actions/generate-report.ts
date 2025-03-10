@@ -3,6 +3,17 @@
 import { generateText } from "ai"
 import { groq } from "@ai-sdk/groq"
 
+interface ReportData {
+  summary: string;
+  sustainabilityScore: number;
+  itemAnalysis: { item: string; analysis: string }[];
+  recommendations: {
+    instruction: string;  // Full buying instruction
+    recipe: string;      // Just the recipe name for visualization
+  }[];
+  timestamp: string;
+}
+
 export async function generateShoppingReport(
   itemLabels: string[],
   profileData: {
@@ -40,7 +51,7 @@ export async function generateShoppingReport(
       1. A brief summary of the shopping choices based on the ACTUAL items listed above
       2. A sustainability score (0-100)
       3. Analysis of each specific item listed above (not generic items)
-      4. Recommendation with a selection of items, quantities, and total estimated cost the user should buy to cook for the configure numberd of people and preferences. Include a recipe idea, and highlight the nutritional values. For example 'Great day at the farmer market. Buy 2 lettuce heads and cilantro and one baguette. This will feed 2 people with protein and fiber.'
+      4. Recommendation with a selection of items, quantities, and total estimated cost the user should buy to cook for the configure numberd of people and preferences. Include a recipe idea, and highlight the nutritional values. Make sure to include the ingredients that should be purchesed. For example 'Great day at the farmer market. Buy 2 lettuce heads and 1 pound of cilantro and one baguette and 3 eggs to make a delicious lettuce salad with side omelette. This will feed 2 people with protein and fiber.'
       
       IMPORTANT: Return ONLY a JSON object with no markdown formatting, code blocks, or backticks. The response should be a valid JSON object with the following structure:
       {
@@ -50,8 +61,10 @@ export async function generateShoppingReport(
           { "item": "Item name from the list", "analysis": "Sustainability analysis" }
         ],
         "recommendations": [
-          "Recommendation 1",
-          "Recommendation 2"
+          {
+            "instruction": "Buy 1 pint of cucumbers ($3.00) and use them to make a refreshing cucumber salad. This will feed 2 people and provide a sustainable source of water and fiber.",
+            "recipe": "cucumber salad with fresh dill and sour cream"
+          }
         ]
       }
     `
@@ -79,7 +92,7 @@ export async function generateShoppingReport(
     cleanedText = cleanedText.trim()
 
     // Try to parse the JSON
-    let reportData
+    let reportData: ReportData
     try {
       reportData = JSON.parse(cleanedText)
 
@@ -114,10 +127,20 @@ export async function generateShoppingReport(
             analysis: `This item is commonly found in ${profileData.diet} diets. Consider local and organic options when available.`,
           })),
           recommendations: [
-            "Consider buying local produce when possible",
-            "Reduce packaging waste by buying in bulk",
-            "Look for sustainable alternatives to common items",
+            {
+              instruction: "Consider buying local produce when possible",
+              recipe: ""
+            },
+            {
+              instruction: "Reduce packaging waste by buying in bulk",
+              recipe: ""
+            },
+            {
+              instruction: "Look for sustainable alternatives to common items",
+              recipe: ""
+            },
           ],
+          timestamp: new Date().toISOString()
         }
       }
     }
@@ -125,7 +148,6 @@ export async function generateShoppingReport(
     // Add timestamp to the report
     return {
       ...reportData,
-      timestamp: new Date().toISOString(),
       success: true,
     }
   } catch (error) {

@@ -3,12 +3,17 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { VisualizeButton } from "@/components/visualize-button"
 
+interface Recommendation {
+  instruction: string;
+  recipe: string;
+}
+
 interface ReportData {
-  summary: string
-  sustainabilityScore: number
-  itemAnalysis: { item: string; analysis: string }[]
-  recommendations: string[]
-  timestamp: string
+  summary: string;
+  sustainabilityScore: number;
+  itemAnalysis: { item: string; analysis: string }[];
+  recommendations: Recommendation[];
+  timestamp: string;
 }
 
 interface GeneratedReportProps {
@@ -82,8 +87,8 @@ export function GeneratedReport({ people, diet, budget, reportData, items }: Gen
             {reportData.recommendations.map((recommendation, index) => (
               <li key={index} className="text-sm">
                 <div className="space-y-2">
-                  <p>{recommendation}</p>
-                  <VisualizeButton prompt={recommendation} />
+                  <p>{recommendation.instruction}</p>
+                  <VisualizeButton prompt={recommendation.recipe} />
                 </div>
               </li>
             ))}
